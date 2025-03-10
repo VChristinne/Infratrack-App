@@ -1,0 +1,21 @@
+[
+    {
+        "id": "503caf4f-13b3-4172-a798-1401cbe21828",
+        "name": "2025R",
+        "serial_number": "JD2025R001",
+        "brand": "John Deere",
+        "model": "2R Series",
+        "type": "Trator",
+        "doc": "https://www.deere.com/assets/publications/index.html?id=849f923c#1"
+    },
+    {
+        "id": "ada80f16-9285-453b-88e8-aa01333a615b",
+        "name": "FlowControl",
+        "serial_number": "RA5xx04170-yyy",
+        "brand": "Toro",
+        "model": "Aqua-TraXX",
+        "type": "Irrigação",
+        "doc": "https://www.toro-ag.it/public/prod_schede/CAT_TOROAG_2023_ENG_-13-16.pdf"
+    }
+]
+

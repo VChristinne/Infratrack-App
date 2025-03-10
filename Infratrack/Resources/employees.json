@@ -1,0 +1,86 @@
+[
+    {
+        "id": "8d6b9a8e-bf6e-4f21-bc4d-65d34374bcb7",
+        "name": "Michael Guzman",
+        "role": "Trabalhador de Campo",
+        "address": "7436 Murphy Ways Apt. 608, East Kim, HI 43478",
+        "avatar": "Image 1"
+    },
+    {
+        "id": "c9fcbff6-35f7-49d7-9f50-fb12523d4979",
+        "name": "Lisa Miller",
+        "role": "Logística",
+        "address": "PSC 6561, Box 4680, APO AP 16291",
+        "avatar": "Image 2"
+    },
+    {
+        "id": "f44b8ef6-0c71-4602-a31d-b285e56e1c99",
+        "name": "Mark Potter",
+        "role": "Engenheiro Agrônomo",
+        "address": "5739 Evans Passage, South Lindahaven, SD 94770",
+        "avatar": "Image 3"
+    },
+    {
+        "id": "0b5f450f-4b88-45fc-bb5e-3371eaadf85f",
+        "name": "Peter Porter",
+        "role": "Logística",
+        "address": "PSC 6567, Box 8162, APO AE 08387",
+        "avatar": "Image 4"
+    },
+    {
+        "id": "cf44a4f5-b56d-4ab5-99fe-28324a40db0d",
+        "name": "Patricia Morales",
+        "role": "Trabalhador de Campo",
+        "address": "27000 Becker Expressway Apt. 615, Lake Troy, NJ 85711",
+        "avatar": "Image 5"
+    },
+    {
+        "id": "978e4b7f-267d-4d80-98b0-1995deaadfc4",
+        "name": "Cynthia Esparza",
+        "role": "Engenheiro Agrônomo",
+        "address": "USNS Nelson, FPO AE 23747",
+        "avatar": "Image 6"
+    },
+    {
+        "id": "c96148a3-8d97-4d24-9ef0-4d97d313d779",
+        "name": "Kevin Hess",
+        "role": "Financeiro",
+        "address": "2988 Anna Rapid Suite 441, Holmesborough, MS 56880",
+        "avatar": "Image 7"
+    },
+    {
+        "id": "2cd33c52-d39f-4d13-96bb-d9c1e50bda13",
+        "name": "Stacey Wilson",
+        "role": "Desenvolvedor",
+        "address": "3188 Kristen Inlet, Jensenview, NH 50100",
+        "avatar": "Image 8"
+    },
+    {
+        "id": "2eb97e9b-4f1b-47be-bbbe-d56e97e0521f",
+        "name": "Amanda Morgan",
+        "role": "Financeiro",
+        "address": "11452 Steven Expressway Apt. 333, East Thomasburgh, SD 49635",
+        "avatar": "Image 9"
+    },
+    {
+        "id": "e698c7b9-c27d-47d0-8272-55de12e56e12",
+        "name": "Robert Smith",
+        "role": "Desenvolvedor",
+        "address": "152 Moore Court, West Alexismouth, AL 02977",
+        "avatar": "Image 10"
+    },
+    {
+        "id": "a801b14a-4372-4ab5-a6b4-b42e1e960b6f",
+        "name": "Pamela Rodriguez",
+        "role": "Gestor de Fazenda",
+        "address": "6444 Powell Turnpike, Jonesmouth, ND 16890",
+        "avatar": "Image 11"
+    },
+    {
+        "id": "08482d8a-b30c-4e80-b178-bfae989db396",
+        "name": "Lisa Jones",
+        "role": "Trabalhador de Campo",
+        "address": "9459 Simpson Flats, Raymondton, SC 08841",
+        "avatar": "Image 12"
+    }
+]
