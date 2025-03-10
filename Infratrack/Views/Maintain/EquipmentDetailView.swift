@@ -7,12 +7,50 @@
 
 import SwiftUI
 
-struct EquipmentDetailView: View {
-	
+struct EquipmentListView: View {
+	@Environment(\.presentationMode) var presentationMode
+
+	let type: String
+	let equipments: [Equipment]
+		
+	var body: some View {
+		NavigationView {
+			List {
+				ForEach(equipments) { equipment in
+					NavigationLink(destination: EquipmentDetailView(equipment: equipment)) {
+						EquipmentRowView(equipment: equipment)
+					}
+				}
+			}
+			.navigationTitle(type)
+			.navigationBarItems(leading: Button(action: {
+				presentationMode.wrappedValue.dismiss()
+			}) {
+				Label("Voltar", systemImage: "chevron.backward")
+					.labelStyle(.automatic)
+			})
+		}
+	}
+}
+
+struct EquipmentRowView: View {
 	let equipment: Equipment
+	
+	var body: some View {
+		VStack(alignment: .leading, spacing: 3) {
+			Text(equipment.name)
+				.foregroundColor(.primary)
+				.font(.headline)
+		}
+	}
+}
+
+struct EquipmentDetailView: View {
 	@State private var date = Date()
 	@ObservedObject private var calendarManager = CalendarManager.shared
-	
+
+	let equipment: Equipment
+
 	var body: some View {
 		VStack {
 			Text("""
