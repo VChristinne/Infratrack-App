@@ -33,6 +33,7 @@ struct MaintainView: View {
 				AddEquipmentView()
 			}
 			
+			// MARK: - CALENDAR ALERTS
 			.alert("Erro ao adicionar no calendário",
 				   isPresented: $calendarManager.didError) {
 				Button("OK", role: .cancel) { }
@@ -52,6 +53,7 @@ struct MaintainView: View {
 			fetchEquipments()
 		}
 		
+		// MARK: - EQUIPMENT LIST
 		.fullScreenCover(isPresented: $showEquipmentList) {
 			if let selectedType = selectedType {
 				let equipmentsForType = groupedEquipments[selectedType] ?? []
@@ -93,6 +95,7 @@ struct MaintainView: View {
 	}
 }
 
+// MARK: - EQUIPMENT DETAILS
 struct EquipmentListView: View {
 	let type: String
 	let equipments: [Equipment]
@@ -114,9 +117,6 @@ struct EquipmentListView: View {
 			}) {
 				Text("Voltar")
 			})
-			.onAppear {
-				debugPrint("Equipments for type \(type): \(equipments)")
-			}
 		}
 	}
 }
