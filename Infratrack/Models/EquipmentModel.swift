@@ -1,6 +1,6 @@
 import Foundation
 
-struct Equipment: Identifiable, Codable {
+struct Equipment: Identifiable, Codable, Hashable {
     let id: UUID
     let name: String
     let serial_number: String

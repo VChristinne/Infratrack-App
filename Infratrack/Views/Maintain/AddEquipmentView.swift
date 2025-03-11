@@ -24,6 +24,7 @@ struct AddEquipmentView: View {
                 }
             }
             .navigationTitle("Novo equipamento")
+			.navigationBarTitleDisplayMode(.inline)
 			.toolbar {
 				ToolbarItem(placement: .cancellationAction) {
 					Button("Cancelar") {

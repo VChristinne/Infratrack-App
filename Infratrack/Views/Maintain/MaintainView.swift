@@ -2,95 +2,154 @@ import SwiftUI
 
 struct MaintainView: View {
 	@State private var equipments: [Equipment] = []
-	@State private var selectedType: String? = "Modelo A"
-	@State private var isAddEquipment = false
-	@State private var showEquipmentList = false
+	@State private var employees: [Employee] = []
+	@State private var selectedType: String = ""
+	@State private var selectedEquipment: Equipment? = nil
+	@State private var selectedEmployee: Employee? = nil
+	@State private var date = Date()
+	@State private var showForm = false
 	
 	@ObservedObject private var calendarManager = CalendarManager.shared
+	@ObservedObject private var scheduleManager = ScheduleManager.shared
 	
-	let data = EquipmentDataManager.shared
+	let dataEquipment = EquipmentDataManager.shared
+	let dataEmployee = EmployeeDataManager.shared
 	
 	var body: some View {
-		GeometryReader { geometry in
-			let gridItems = [GridItem(.adaptive(minimum: 100), spacing: 12)]
+		VStack {
+			HStack {
+				Button(action: {
+					showForm.toggle()
+				}) {
+					Label("Manutenção", systemImage: "plus")
+				}
+				.labelStyle(.iconOnly)
+				.buttonStyle(.borderless)
+				
+				Spacer()
+			}
+			.padding(.horizontal)
 			
-			ScrollView {
-				LazyVGrid(columns: gridItems) {
-					ForEach(groupedEquipments.keys.sorted(), id: \.self) { type in
-						Button(action: {
-							selectedType = type
-							showEquipmentList = true
-							debugPrint("Button pressed, selected type: \(selectedType ?? "None")")
-						}) {
-							EquipmentCardView(type: type)
+				// MARK: - SCHEDULE LIST
+			List {
+				ForEach(scheduleManager.schedules) { schedule in
+					VStack(alignment: .leading) {
+						Text("**Data**: \(formattedDate(from: schedule.date))")
+						Text("**Equipamento**: \(schedule.equipmentName)")
+						Text("**Responsável**: \(schedule.employeeName)")
+					}
+					.swipeActions(edge: .trailing, allowsFullSwipe: false) {
+						Button(role: .destructive) {
+							if let index = scheduleManager.schedules.firstIndex(where: { $0.id == schedule.id }) {
+								scheduleManager.schedules.remove(at: index)
+							}
+						} label: {
+							Label("Delete", systemImage: "trash")
 						}
 					}
 				}
-				.padding()
 			}
-			
-			.sheet(isPresented: $isAddEquipment) {
-				AddEquipmentView()
-			}
-			
-			// MARK: - CALENDAR ALERTS
-			.alert("Erro ao adicionar no calendário",
-				   isPresented: $calendarManager.didError) {
-				Button("OK", role: .cancel) { }
-			} message: {
-				Text(calendarManager.errorMessage)
-			}
-			
-			.alert("Sucesso",
-				   isPresented: $calendarManager.eventAddedSuccessfully) {
-				Button("OK", role: .cancel) { }
-			} message: {
-				Text("Evento adicionado ao calendário")
-			}
-			
+		}
+		.sheet(isPresented: $showForm) {
+			ScheduleFormView(equipments: $equipments, employees: $employees, selectedType: $selectedType, selectedEquipment: $selectedEquipment, selectedEmployee: $selectedEmployee, date: $date, calendarManager: calendarManager, scheduleManager: scheduleManager)
 		}
 		.onAppear {
 			fetchEquipments()
+			fetchEmployees()
 		}
 		
-		// MARK: - EQUIPMENT LIST
-		.fullScreenCover(isPresented: $showEquipmentList) {
-			if let selectedType = selectedType {
-				let equipmentsForType = groupedEquipments[selectedType] ?? []
-				EquipmentListView(type: selectedType, equipments: equipmentsForType)
-					.onAppear {
-						debugPrint("Selected type: \(selectedType), Equipments: \(equipmentsForType)")
+			// MARK: - CALENDAR ALERTS
+		.alert("Erro ao adicionar no calendário", isPresented: $calendarManager.didError) {
+			Button("OK", role: .cancel) { }
+		} message: {
+			Text(calendarManager.errorMessage)
+		}
+		.alert("Sucesso", isPresented: $calendarManager.eventAddedSuccessfully) {
+			Button("OK", role: .cancel) { }
+		} message: {
+			Text("Evento adicionado ao calendário")
+		}
+	}
+	
+		// MARK: - FETCH DATA
+	func fetchEquipments() {
+		equipments = dataEquipment.fetchEquipments()
+	}
+	
+	func fetchEmployees() {
+		employees = dataEmployee.fetchEmployees()
+	}
+	
+		// MARK: - DATE FORMATTING
+	func formattedDate(from isoString: String) -> String {
+		let isoFormatter = ISO8601DateFormatter()
+		if let date = isoFormatter.date(from: isoString) {
+			let formatter = DateFormatter()
+			formatter.dateStyle = .long
+			formatter.timeStyle = .short
+			return formatter.string(from: date)
+		}
+		return isoString
+	}
+}
+
+	// MARK: - ScheduleFormView
+struct ScheduleFormView: View {
+	@Binding var equipments: [Equipment]
+	@Binding var employees: [Employee]
+	@Binding var selectedType: String
+	@Binding var selectedEquipment: Equipment?
+	@Binding var selectedEmployee: Employee?
+	@Binding var date: Date
+	
+	@ObservedObject var calendarManager: CalendarManager
+	@ObservedObject var scheduleManager: ScheduleManager
+	
+	var body: some View {
+		Form {
+			Section(header: Text("Equipamento")) {
+				Picker("Tipo", selection: $selectedType) {
+					ForEach(Array(Set(equipments.map { $0.type })).sorted(), id: \.self) { type in
+						Text(type).tag(type)
 					}
+				}
+				
+				Picker("Nome", selection: $selectedEquipment) {
+					ForEach(equipments.filter { $0.type == selectedType }, id: \.id) { equipment in
+						Text(equipment.name).tag(equipment as Equipment?)
+					}
+				}
+				
+				Picker("Responsável", selection: $selectedEmployee) {
+					ForEach(employees, id: \.id) { employee in
+						Text(employee.name).tag(employee as Employee?)
+					}
+				}
+			}
+			
+			Section(header: Text("Agendamento")) {
+				DatePicker("Data/Hora", selection: $date, displayedComponents: [.date, .hourAndMinute])
+					.datePickerStyle(.compact)
+				
+				Button(action: {
+					let newSchedule = Schedule(
+						equipmentType: selectedEquipment?.type ?? "",
+						equipmentName: selectedEquipment?.name ?? "",
+						employeeName: selectedEmployee?.name ?? "",
+						date: date.iso8601String
+					)
+					scheduleManager.addSchedule(newSchedule)
+					calendarManager.addEvent(title: "Manutenção: \(selectedEquipment?.name ?? "")", date: date)
+				}) {
+					Text("Salvar no calendário")
+				}
 			}
 		}
 	}
-	
-	var groupedEquipments: [String: [Equipment]] {
-		let grouped = Dictionary(grouping: equipments, by: { $0.type })
-		return grouped
-	}
-	
-	func fetchEquipments() {
-			//equipments = data.fetchEquipments()
-		equipments = [
-			Equipment(id: UUID(), name: "Equipamento 1", serial_number: "Tipo A", brand: "123456", model: "Marca A", type: "Modelo A", doc: "Documentação A"),
-			Equipment(id: UUID(), name: "Equipamento 2", serial_number: "Tipo A", brand: "123456", model: "Marca A", type: "Modelo A", doc: "Documentação B"),
-			Equipment(id: UUID(), name: "Equipamento 3", serial_number: "Tipo B", brand: "123456", model: "Marca B", type: "Modelo B", doc: "Documentação C"),
-			Equipment(id: UUID(), name: "Equipamento 4", serial_number: "Tipo B", brand: "123456", model: "Marca B", type: "Modelo B", doc: "Documentação D"),
-			Equipment(id: UUID(), name: "Equipamento 5", serial_number: "Tipo C", brand: "123456", model: "Marca C", type: "Modelo C", doc: "Documentação E"),
-			Equipment(id: UUID(), name: "Equipamento 6", serial_number: "Tipo C", brand: "123456", model: "Marca E", type: "Modelo C", doc: "Documentação F"),
-			Equipment(id: UUID(), name: "Equipamento 7", serial_number: "Tipo D", brand: "123456", model: "Marca D", type: "Modelo D", doc: "Documentação G"),
-			Equipment(id: UUID(), name: "Equipamento 8", serial_number: "Tipo D", brand: "123456", model: "Marca F", type: "Modelo D", doc: "Documentação H"),
-			Equipment(id: UUID(), name: "Equipamento 9", serial_number: "Tipo E", brand: "123456", model: "Marca G", type: "Modelo E", doc: "Documentação I"),
-			Equipment(id: UUID(), name: "Equipamento 10", serial_number: "Tipo E", brand: "123456", model: "Marca H", type: "Modelo E", doc: "Documentação J"),
-			Equipment(id: UUID(), name: "Equipamento 11", serial_number: "Tipo F", brand: "123456", model: "Marca I", type: "Modelo F", doc: "Documentação K"),
-			Equipment(id: UUID(), name: "Equipamento 12", serial_number: "Tipo F", brand: "123456", model: "Marca J", type: "Modelo F", doc: "Documentação L"),
-			Equipment(id: UUID(), name: "Equipamento 13", serial_number: "Tipo G", brand: "123456", model: "Marca K", type: "Modelo G", doc: "Documentação M"),
-			Equipment(id: UUID(), name: "Equipamento 14", serial_number: "Tipo G", brand: "123456", model: "Marca L", type: "Modelo G", doc: "Documentação N"),
-			Equipment(id: UUID(), name: "Equipamento 15", serial_number: "Tipo H", brand: "123456", model: "Marca M", type: "Modelo H", doc: "Documentação O"),
-			Equipment(id: UUID(), name: "Equipamento 16", serial_number: "Tipo H", brand: "123456", model: "Marca N", type: "Modelo H", doc: "Documentação P"),
-			Equipment(id: UUID(), name: "Equipamento 17", serial_number: "Tipo I", brand: "123456", model: "Marca O", type: "Modelo I", doc: "Documentação Q"),
-			Equipment(id: UUID(), name: "Equipamento 18", serial_number: "Tipo I", brand: "123456", model: "Marca P", type: "Modelo I", doc: "Documentação R"),
-		]
+}
+
+extension Date {
+	var iso8601String: String {
+		return ISO8601DateFormatter().string(from: self)
 	}
 }
