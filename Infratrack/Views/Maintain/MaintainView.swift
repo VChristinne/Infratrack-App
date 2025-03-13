@@ -39,6 +39,7 @@ struct MaintainView: View {
 						Text("**Responsável**: \(schedule.employeeName)")
 					}
 					.swipeActions(edge: .trailing, allowsFullSwipe: false) {
+						
 						Button(role: .destructive) {
 							if let index = scheduleManager.schedules.firstIndex(where: { $0.id == schedule.id }) {
 								scheduleManager.schedules.remove(at: index)
@@ -111,6 +112,11 @@ struct ScheduleFormView: View {
 				Picker("Tipo", selection: $selectedType) {
 					ForEach(Array(Set(equipments.map { $0.type })).sorted(), id: \.self) { type in
 						Text(type).tag(type)
+					}
+				}
+				.onChange(of: selectedType) { oldValue, newValue in
+					if let firstEquipment = equipments.first(where: { $0.type == newValue }) {
+						selectedEquipment = firstEquipment
 					}
 				}
 				

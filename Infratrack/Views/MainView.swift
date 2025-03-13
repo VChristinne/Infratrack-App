@@ -19,7 +19,7 @@ enum Tabs: Equatable, Hashable {
 
 struct MainView: View {
 	
-	@State private var selectedTab: Tabs = .maintain
+	@State private var selectedTab: Tabs = .tracking
 
 	var body: some View {
 		TabView(selection: $selectedTab) {
@@ -56,4 +56,9 @@ struct MainView: View {
 		}
 		.tabViewStyle(.sidebarAdaptable)
 	}
+}
+
+#Preview {
+	MainView()
+		.preferredColorScheme(.light)
 }
