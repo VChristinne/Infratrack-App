@@ -12,8 +12,8 @@ struct MaintainView: View {
 	@ObservedObject private var calendarManager = CalendarManager.shared
 	@ObservedObject private var scheduleManager = ScheduleManager.shared
 	
-	let dataEquipment = EquipmentDataManager.shared
-	let dataEmployee = EmployeeDataManager.shared
+	let dataEquipment = EquipmentManager.shared
+	let dataEmployee = EmployeeManager.shared
 	
 	var body: some View {
 		VStack {

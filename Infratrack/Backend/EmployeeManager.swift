@@ -1,7 +1,7 @@
 import Foundation
 
-class EmployeeDataManager {
-    static let shared = EmployeeDataManager()
+class EmployeeManager {
+    static let shared = EmployeeManager()
     private var employees: [Employee] = []
     
     private init() {

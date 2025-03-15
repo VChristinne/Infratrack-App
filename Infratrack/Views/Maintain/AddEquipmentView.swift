@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddEquipmentView: View {
     @Environment(\.dismiss) var dismiss
-    let data = EquipmentDataManager.shared
+    let data = EquipmentManager.shared
     
     @State private var name: String = ""
     @State private var serialNumber: String = ""

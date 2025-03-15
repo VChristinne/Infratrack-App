@@ -1,7 +1,7 @@
 import Foundation
 
-class EquipmentDataManager {
-	static let shared = EquipmentDataManager()
+class EquipmentManager {
+	static let shared = EquipmentManager()
 	private var equipments: [Equipment] = []
 	
 	private init() {

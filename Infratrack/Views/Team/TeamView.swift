@@ -3,7 +3,7 @@ import SwiftUI
 struct TeamView: View {
 	@State private var employees: [Employee] = []
 	
-	let data = EmployeeDataManager.shared
+	let data = EmployeeManager.shared
 	
 	var body: some View {
 		GeometryReader { geometry in
