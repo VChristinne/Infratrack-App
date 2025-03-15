@@ -1,19 +1,8 @@
 import SwiftUI
 
 struct MaintainView: View {
-	@State private var equipments: [Equipment] = []
-	@State private var employees: [Employee] = []
-	@State private var selectedType: String = ""
-	@State private var selectedEquipment: Equipment? = nil
-	@State private var selectedEmployee: Employee? = nil
-	@State private var date = Date()
+	@StateObject private var viewModel = MaintainViewModel()
 	@State private var showForm = false
-	
-	@ObservedObject private var calendarManager = CalendarManager.shared
-	@ObservedObject private var scheduleManager = ScheduleManager.shared
-	
-	let dataEquipment = EquipmentDataManager.shared
-	let dataEmployee = EmployeeDataManager.shared
 	
 	var body: some View {
 		VStack {
@@ -32,16 +21,16 @@ struct MaintainView: View {
 			
 				// MARK: - SCHEDULE LIST
 			List {
-				ForEach(scheduleManager.schedules) { schedule in
+				ForEach(viewModel.schedules) { schedule in
 					VStack(alignment: .leading) {
-						Text("**Data**: \(formattedDate(from: schedule.date))")
+						Text("**Data**: \(viewModel.formattedDate(from: schedule.date))")
 						Text("**Equipamento**: \(schedule.equipmentName)")
 						Text("**Responsável**: \(schedule.employeeName)")
 					}
 					.swipeActions(edge: .trailing, allowsFullSwipe: false) {
 						Button(role: .destructive) {
-							if let index = scheduleManager.schedules.firstIndex(where: { $0.id == schedule.id }) {
-								scheduleManager.schedules.remove(at: index)
+							if let index = viewModel.schedules.firstIndex(where: { $0.id == schedule.id }) {
+									// deleteSchedule()
 							}
 						} label: {
 							Label("Delete", systemImage: "trash")
@@ -51,33 +40,26 @@ struct MaintainView: View {
 			}
 		}
 		.sheet(isPresented: $showForm) {
-			ScheduleFormView(equipments: $equipments, employees: $employees, selectedType: $selectedType, selectedEquipment: $selectedEquipment, selectedEmployee: $selectedEmployee, date: $date, calendarManager: calendarManager, scheduleManager: scheduleManager)
-		}
-		.onAppear {
-			fetchEquipments()
-			fetchEmployees()
+			ScheduleFormView(viewModel: viewModel)
 		}
 		
 			// MARK: - CALENDAR ALERTS
-		.alert("Erro ao adicionar no calendário", isPresented: $calendarManager.didError) {
+		.alert("Erro ao adicionar no calendário", isPresented: Binding<Bool>(
+			get: { CalendarManager.shared.didError },
+			set: { _ in }
+		)) {
 			Button("OK", role: .cancel) { }
 		} message: {
-			Text(calendarManager.errorMessage)
+			Text(CalendarManager.shared.errorMessage)
 		}
-		.alert("Sucesso", isPresented: $calendarManager.eventAddedSuccessfully) {
+		.alert("Sucesso", isPresented: Binding<Bool>(
+			get: { CalendarManager.shared.eventAddedSuccessfully },
+			set: { _ in }
+		)) {
 			Button("OK", role: .cancel) { }
 		} message: {
 			Text("Evento adicionado ao calendário")
 		}
-	}
-	
-		// MARK: - FETCH DATA
-	func fetchEquipments() {
-		equipments = dataEquipment.fetchEquipments()
-	}
-	
-	func fetchEmployees() {
-		employees = dataEmployee.fetchEmployees()
 	}
 	
 		// MARK: - DATE FORMATTING
@@ -95,61 +77,43 @@ struct MaintainView: View {
 
 	// MARK: - ScheduleFormView
 struct ScheduleFormView: View {
-	@Binding var equipments: [Equipment]
-	@Binding var employees: [Employee]
-	@Binding var selectedType: String
-	@Binding var selectedEquipment: Equipment?
-	@Binding var selectedEmployee: Employee?
-	@Binding var date: Date
-	
-	@ObservedObject var calendarManager: CalendarManager
-	@ObservedObject var scheduleManager: ScheduleManager
+	@Environment(\.dismiss) var dismiss
+	@ObservedObject var viewModel: MaintainViewModel
 	
 	var body: some View {
 		Form {
 			Section(header: Text("Equipamento")) {
-				Picker("Tipo", selection: $selectedType) {
-					ForEach(Array(Set(equipments.map { $0.type })).sorted(), id: \.self) { type in
+				Picker("Tipo", selection: $viewModel.selectedType) {
+					ForEach(Array(Set(viewModel.equipments.map { $0.type })).sorted(), id: \.self) { type in
 						Text(type).tag(type)
 					}
 				}
 				
-				Picker("Nome", selection: $selectedEquipment) {
-					ForEach(equipments.filter { $0.type == selectedType }, id: \.id) { equipment in
+				Picker("Nome", selection: $viewModel.selectedEquipment) {
+					ForEach(viewModel.equipments.filter { $0.type == viewModel.selectedType }, id: \.id) { equipment in
 						Text(equipment.name).tag(equipment as Equipment?)
 					}
 				}
 				
-				Picker("Responsável", selection: $selectedEmployee) {
-					ForEach(employees, id: \.id) { employee in
+				Picker("Responsável", selection: $viewModel.selectedEmployee) {
+					ForEach(viewModel.employees, id: \.id) { employee in
 						Text(employee.name).tag(employee as Employee?)
 					}
 				}
 			}
 			
 			Section(header: Text("Agendamento")) {
-				DatePicker("Data/Hora", selection: $date, displayedComponents: [.date, .hourAndMinute])
+				DatePicker("Data/Hora", selection: $viewModel.date, displayedComponents: [.date, .hourAndMinute])
 					.datePickerStyle(.compact)
 				
 				Button(action: {
-					let newSchedule = Schedule(
-						equipmentType: selectedEquipment?.type ?? "",
-						equipmentName: selectedEquipment?.name ?? "",
-						employeeName: selectedEmployee?.name ?? "",
-						date: date.iso8601String
-					)
-					scheduleManager.addSchedule(newSchedule)
-					calendarManager.addEvent(title: "Manutenção: \(selectedEquipment?.name ?? "")", date: date)
+					viewModel.addSchedule()
+					dismiss()
 				}) {
 					Text("Salvar no calendário")
 				}
+				.disabled(viewModel.selectedEquipment == nil || viewModel.selectedEmployee == nil)
 			}
 		}
-	}
-}
-
-extension Date {
-	var iso8601String: String {
-		return ISO8601DateFormatter().string(from: self)
 	}
 }

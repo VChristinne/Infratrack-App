@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct AddEquipmentView: View {
+	@StateObject private var viewModel = EquipmentViewModel()
+
     @Environment(\.dismiss) var dismiss
-    let data = EquipmentDataManager.shared
     
     @State private var name: String = ""
     @State private var serialNumber: String = ""
@@ -52,7 +53,7 @@ struct AddEquipmentView: View {
             type: type,
             doc: doc
         )
-        data.addEquipment(newEquipment)
+		viewModel.addEquipment(newEquipment)
         dismiss()
     }
 }

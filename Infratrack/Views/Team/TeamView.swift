@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct TeamView: View {
+	@StateObject private var viewModel = EmployeeViewModel()
 	@State private var employees: [Employee] = []
-	
-	let data = EmployeeDataManager.shared
 	
 	var body: some View {
 		GeometryReader { geometry in
@@ -18,14 +17,6 @@ struct TeamView: View {
 				}
 				.padding()
 			}
-			
-			.onAppear {
-				fetchEmployees()
-			}
 		}
-	}
-	
-	func fetchEmployees() {
-		employees = data.fetchEmployees()
 	}
 }
